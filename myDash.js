@@ -686,8 +686,12 @@ Signals.addSignalMethods(myDash.prototype);
  *   like the original .running one.
  * - Optionally remove the original .running class (depending on the theme it
  *   could visually conflict with the custom ones).
+ * - add a .focused style to the focused app
  *
  */
+
+let tracker = Shell.WindowTracker.get_default();
+
 const myAppIcon = new Lang.Class({
     Name: 'dashToDock.AppIcon',
     Extends: AppDisplay.AppIcon,
@@ -719,13 +723,16 @@ const myAppIcon = new Lang.Class({
         this._stateChangedId = this.app.connect('windows-changed',
                                                 Lang.bind(this,
                                                           this._onStateChanged));
+        this._focuseAppChangeId = tracker.connect('notify::focus-app',
+                                                Lang.bind(this,
+                                                          this._onFocusAppChanged));
 
         // Bind settings changes
         this._settingsChangedId1 = this._settings.connect('changed::app-windows-counter',
-                Lang.bind(this, this._resetCounterClass));
+                Lang.bind(this, this._resetCustomClasses));
 
         this._settingsChangedId2 = this._settings.connect('changed::app-windows-counter-remove-default',
-                Lang.bind(this, this._resetCounterClass));
+                Lang.bind(this, this._resetCustomClasses));
 
     },
 
@@ -737,6 +744,11 @@ const myAppIcon = new Lang.Class({
             this._settings.disconnect(this._settingsChangedId1);
         if(this._settingsChangedId2>0)
             this._settings.disconnect(this._settingsChangedId2);
+
+        // Disconect global signals
+        // stateChangedId is already handled by parent)
+        if(this._focusAppId>0)
+            tracker.disconnect(this._focusAppId);
     },
 
     _onStateChanged: function() {
@@ -748,10 +760,18 @@ const myAppIcon = new Lang.Class({
         this._updateCounterClass();
     },
 
-    _resetCounterClass: function(){
+    _onFocusAppChanged: function() {
+        if(tracker.focus_app == this.app)
+            this.actor.add_style_class_name('focused');
+        else
+            this.actor.remove_style_class_name('focused');
+    },
+
+    _resetCustomClasses: function(){
 
         if(this._settings.get_boolean('app-windows-counter-remove-default'))
             this.actor.remove_style_class_name('running');
+        this._onFocusAppChanged();
         this._onStateChanged();
     },
 
