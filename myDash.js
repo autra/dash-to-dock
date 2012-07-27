@@ -734,6 +734,9 @@ const myAppIcon = new Lang.Class({
         this._settingsChangedId2 = this._settings.connect('changed::app-windows-counter-remove-default',
                 Lang.bind(this, this._resetCustomClasses));
 
+        this._settingsChangedId3 = this._settings.connect('changed::focused-app',
+                Lang.bind(this, this._resetCustomClasses));
+
     },
 
     _onDestroy: function() {
@@ -744,6 +747,8 @@ const myAppIcon = new Lang.Class({
             this._settings.disconnect(this._settingsChangedId1);
         if(this._settingsChangedId2>0)
             this._settings.disconnect(this._settingsChangedId2);
+        if(this._settingsChangedId3>0)
+            this._settings.disconnect(this._settingsChangedId3);
 
         // Disconect global signals
         // stateChangedId is already handled by parent)
@@ -761,7 +766,7 @@ const myAppIcon = new Lang.Class({
     },
 
     _onFocusAppChanged: function() {
-        if(tracker.focus_app == this.app)
+        if(tracker.focus_app == this.app && this._settings.get_boolean('focused-app'))
             this.actor.add_style_class_name('focused');
         else
             this.actor.remove_style_class_name('focused');

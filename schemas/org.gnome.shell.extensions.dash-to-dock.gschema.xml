@@ -128,5 +128,10 @@
       <summary>Action when clicking on a running app</summary>
       <description>Set the action that is executed when clicking on the icon of a running application</description>
     </key>
+    <key type="b" name="focused-app">
+      <default>true</default>
+      <summary>Apply style to the focused app</summary>
+      <description>Show a visual indication of the currently focused app</description>
+    </key>
   </schema>
 </schemalist>
