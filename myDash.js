@@ -684,8 +684,6 @@ Signals.addSignalMethods(myDash.prototype);
  * - Apply a css class based on the number of windows of each application (#N);
  *   a class of the form "running#N" is applied to the AppWellIcon actor.
  *   like the original .running one.
- * - Optionally remove the original .running class (depending on the theme it
- *   could visually conflict with the custom ones).
  * - add a .focused style to the focused app
  *
  */
@@ -731,9 +729,6 @@ const myAppIcon = new Lang.Class({
         this._settingsChangedId1 = this._settings.connect('changed::app-windows-counter',
                 Lang.bind(this, this._resetCustomClasses));
 
-        this._settingsChangedId2 = this._settings.connect('changed::app-windows-counter-remove-default',
-                Lang.bind(this, this._resetCustomClasses));
-
         this._settingsChangedId3 = this._settings.connect('changed::focused-app',
                 Lang.bind(this, this._resetCustomClasses));
 
@@ -758,10 +753,7 @@ const myAppIcon = new Lang.Class({
 
     _onStateChanged: function() {
 
-        if (!this._settings.get_boolean('app-windows-counter-remove-default') ||
-            !this._settings.get_boolean('app-windows-counter'))
-            this.parent();
-
+        this.parent();
         this._updateCounterClass();
     },
 
@@ -774,8 +766,6 @@ const myAppIcon = new Lang.Class({
 
     _resetCustomClasses: function(){
 
-        if(this._settings.get_boolean('app-windows-counter-remove-default'))
-            this.actor.remove_style_class_name('running');
         this._onFocusAppChanged();
         this._onStateChanged();
     },
